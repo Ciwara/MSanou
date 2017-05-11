@@ -8,8 +8,8 @@ from __future__ import (
 
 from datetime import datetime
 
-from peewee import (DateTimeField, CharField, IntegerField, FloatField, BooleanField,
-                    ForeignKeyField, TextField)
+from peewee import (DateTimeField, CharField, IntegerField, FloatField,
+                    BooleanField, ForeignKeyField, TextField)
 from Common.models import (BaseModel, SettingsAdmin, Version, FileJoin,
                            Organization, Owner)
 
@@ -28,18 +28,19 @@ class ProviderOrClient(BaseModel):
     FSEUR = 'Fournisseur'
     TYPES = [CLT, FSEUR]
 
-    name = CharField(verbose_name=("Nom de votre entreprise"))
+    name = CharField(unique=True, verbose_name=("Nom de votre entreprise"))
     address = TextField(
         null=True, verbose_name=("Adresse principale de votre société"))
-    phone = IntegerField(
-        unique=True, verbose_name=("Numero de téléphone de votre entreprise"))
+    phone = CharField(
+        verbose_name=("Numero de téléphone de votre entreprise"), default="")
     email = CharField(
         null=True, verbose_name=("Adresse électronique de votre entreprise"))
     legal_infos = TextField(
         null=True, verbose_name=("Informations légales"))
     type_ = CharField(max_length=30, choices=TYPES, default=CLT)
     picture = ForeignKeyField(
-        FileJoin, null=True, related_name='file_joins_pictures', verbose_name=("image de la societe"))
+        FileJoin, null=True, related_name='file_joins_pictures',
+        verbose_name=("image de la societe"))
 
     def invoices(self):
         return Invoice.select().where(Invoice.client == self)

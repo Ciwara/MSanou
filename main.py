@@ -20,7 +20,7 @@ from PyQt4.QtGui import QApplication
 from database import setup
 from Common.ui.window import FWindow
 from Common.cmain import cmain
-from Common.ui.qss import dict_style
+# from Common.ui.qss import dict_style
 
 from ui.mainwindow import MainWindow
 
@@ -33,7 +33,7 @@ def main():
     # locale.setlocale(locale.LC_ALL, '')
     # gettext.install('main.py', localedir='locale')
     window = MainWindow()
-    window.setStyleSheet(dict_style.get(3)[1])
+    # window.setStyleSheet(dict_style.get(3)[1])
     setattr(FWindow, 'window', window)
     # window.show()
     window.showMaximized()

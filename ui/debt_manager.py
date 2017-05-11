@@ -12,13 +12,12 @@ from PyQt4.QtCore import Qt, QSize
 
 from models import ProviderOrClient, Payment
 
-from Common.ui.common import (FWidget, Button,
-                              LineEdit, FLabel, FormatDate, FormLabel)
+from Common.ui.common import (FWidget, Button, LineEdit, FormLabel)
 from Common.ui.table import FTableWidget, TotalsWidget
 from Common.ui.util import device_amount, show_date, is_float
 
 from ui.payment_edit_add import EditOrAddPaymentrDialog
-from GCommon.ui.provider_client_edit_add import EditOrAddClientOrProviderDialog
+from ui.provider_client_edit_add import EditOrAddClientOrProviderDialog
 
 from configuration import Config
 
@@ -192,7 +191,7 @@ class ProviderOrClientTableWidget(QListWidget):
         action = menu.exec_(self.mapToGlobal(pos))
 
         provid_clt = ProviderOrClient.get(
-            ProviderOrClient.phone == self.item(row).text().split(",")[1])
+            ProviderOrClient.name == self.item(row).text())
         if action == editaction:
             self.parent.open_dialog(EditOrAddClientOrProviderDialog, modal=True,
                                     prov_clt=provid_clt, table_p=self)
@@ -205,7 +204,8 @@ class ProviderOrClientTableWidget(QListWidget):
         qs = ProviderOrClient.select().where(
             ProviderOrClient.type_ == ProviderOrClient.CLT)
         if provid_clt:
-            qs = qs.where(ProviderOrClient.name.contains(provid_clt))
+            qs = qs.where(ProviderOrClient.name.contains(provid_clt)
+                          or ProviderOrClient.phone.contains(provid_clt))
         for provid_clt in qs:
             self.addItem(ProviderOrClientQListWidgetItem(provid_clt))
 
@@ -225,21 +225,23 @@ class ProviderOrClientQListWidgetItem(QListWidgetItem):
         super(ProviderOrClientQListWidgetItem, self).__init__()
 
         self.provid_clt = provid_clt
-        self.setSizeHint(QSize(0, 30))
+        self.setSizeHint(QSize(0, 50))
         icon = QIcon()
 
         if not isinstance(self.provid_clt, str):
-            icon.addPixmap(QPixmap("{}.png".format(
-                Config.img_media + "debt" if self.provid_clt.is_indebted() else Config.img_cmedia + "user_active")),
-                QIcon.Normal, QIcon.Off)
+            img = "user"
+        else:
+            img = "group"
+
+        icon.addPixmap(QPixmap("{}.png".format(
+            Config.img_media + img)), QIcon.Normal, QIcon.Off)
 
         self.setIcon(icon)
         self.init_text()
 
     def init_text(self):
         try:
-            self.setText(
-                "{}, {}".format(self.provid_clt.name, self.provid_clt.phone))
+            self.setText(self.provid_clt.name)
         except AttributeError:
             font = QFont()
             font.setBold(True)
